@@ -16,7 +16,7 @@ RUN cmake -S llama.cpp -B llama.cpp/build \
     && cmake --build llama.cpp/build --config Release -j2 --target llama-server
 RUN mkdir -p /models \
     && curl -fL --retry 5 --retry-delay 2 \
-      "https://huggingface.co/QuantFactory/SmolLM2-135M-Instruct-GGUF/resolve/main/SmolLM2-135M-Instruct-Q4_K_M.gguf" \
+      "https://huggingface.co/QuantFactory/SmolLM2-135M-Instruct-GGUF/resolve/main/SmolLM2-135M-Instruct.Q4_K_M.gguf" \
       -o /models/SmolLM2-135M-Instruct-Q4_K_M.gguf
 
 FROM node:20-bookworm-slim
