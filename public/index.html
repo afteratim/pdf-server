@@ -32,7 +32,7 @@
  <div class="chat-head"><div><h3>Chat with your PDFs</h3><div class="hint" id="scopeText">No documents loaded · Upload PDFs to begin</div></div><div class="toolbar"><button id="exportChat" class="btn-light btn-small">Export chat</button><button id="clearChat" class="btn-light btn-small">Clear chat</button></div></div>
  <div id="chatBody" class="chat-body"><div class="welcome" id="welcome"><div class="emoji">💬</div><h2>Ask anything about your PDFs</h2><p>Upload documents, then use the quick actions or ask your own question. Results search all uploaded PDFs.</p></div></div>
  <div class="chat-compose">
-  <div class="ai-panel"><div><strong style="font-size:13px">Server-side AI assistant</strong><div id="aiStatus" class="ai-status">AI off · deterministic extraction is ready</div></div><div class="ai-controls"><select id="modelSelect" aria-label="Select local AI model"><option value="smollm">SmolLM2 360M · quantized</option></select><button id="loadAI" class="btn-light btn-small">Load server model</button><button id="disableAI" class="btn-light btn-small hidden">Unload AI</button></div></div>
+  <div class="ai-panel"><div><strong style="font-size:13px">Server-side AI assistant</strong><div id="aiStatus" class="ai-status">AI off · deterministic extraction is ready</div></div><div class="ai-controls"><select id="modelSelect" aria-label="Select local AI model"><option value="smollm">SmolLM2 135M · GGUF Q4_K_M</option></select><button id="loadAI" class="btn-light btn-small">Load server model</button></div></div>
   <div class="ai-model-note">The model is included in the server image and runs on Render, not on your device. Only one model is supported in this first build. Loading may exceed Render Free memory; if it fails, document search and extraction will continue to work.</div>
   <div class="quick-actions" id="quickActions">
    <button data-q="Extract all bill numbers from all uploaded PDFs">Extract bill numbers</button><button data-q="Find all invoice dates">Find invoice dates</button><button data-q="Extract all GSTIN numbers">Find GSTINs</button><button data-q="Find duplicate bill numbers">Find duplicates</button><button data-q="Extract all invoice amounts">Extract amounts</button><button data-q="Find all party names">Find party names</button><button data-q="Compare bill numbers across all PDFs">Compare PDFs</button><button data-q="Summarize all uploaded PDFs">Summarize documents</button>
@@ -196,17 +196,17 @@ $("clearChat").onclick=async()=>{if(!confirm("Permanently clear saved chat histo
 $("exportChat").onclick=()=>{const text=conversation.map(m=>m.role.toUpperCase()+"\n"+m.text).join("\n\n----------------\n\n");const blob=new Blob([text],{type:"text/plain;charset=utf-8"});const url=URL.createObjectURL(blob);const a=document.createElement("a");a.href=url;a.download="pdf-chat-session.txt";a.click();URL.revokeObjectURL(url);};
 
 async function refreshAIStatus(){
- try{const d=await api("/api/ai/status");activeModelId=d.loaded?"SmolLM2 360M":"";$("aiStatus").textContent=d.loaded?"SmolLM2 360M loaded on Render · server-side inference":d.loading?"Model is loading on Render…":"Server AI not loaded · document search is available";$("loadAI").classList.toggle("hidden",!!d.loaded);$("disableAI").classList.toggle("hidden",!d.loaded);$("loadAI").disabled=!!d.loading;}
+ try{const d=await api("/api/ai/status");activeModelId=d.loaded?"SmolLM2 135M":"";$("aiStatus").textContent=d.loaded?"SmolLM2 135M loaded on Render · stays loaded until restart":d.loading?"Model is loading on Render…":"Server AI not loaded · document search is available";$("loadAI").classList.toggle("hidden",!!d.loaded);$("loadAI").disabled=!!d.loading;}
  catch(_){$("aiStatus").textContent="AI status unavailable";}
 }
 $("modelSelect").disabled=true;
 $("loadAI").onclick=async()=>{
- if(aiLoading)return;aiLoading=true;$("loadAI").disabled=true;$("aiStatus").textContent="Loading the quantized SmolLM2 model into Render memory. This may take several minutes and may exceed the free instance memory…";
- try{await api("/api/ai/load",{method:"POST",body:JSON.stringify({model:"smollm"})});activeModelId="SmolLM2 360M";$("aiStatus").textContent="SmolLM2 360M loaded on Render · server-side inference";$("loadAI").classList.add("hidden");$("disableAI").classList.remove("hidden");}
+ if(aiLoading)return;aiLoading=true;$("loadAI").disabled=true;$("aiStatus").textContent="Starting the low-memory SmolLM2 135M model on Render. First load may take several minutes…";
+ try{await api("/api/ai/load",{method:"POST",body:JSON.stringify({model:"smollm"})});activeModelId="SmolLM2 135M";$("aiStatus").textContent="SmolLM2 135M loaded on Render · stays loaded until restart";$("loadAI").classList.add("hidden");}
  catch(error){$("aiStatus").textContent=error.message;$("loadAI").disabled=false;}
  finally{aiLoading=false;checkHealth();}
 };
-$("disableAI").onclick=async()=>{try{await api("/api/ai/unload",{method:"POST",body:JSON.stringify({})});}catch(e){$("aiStatus").textContent=e.message;}activeModelId="";$("disableAI").classList.add("hidden");$("loadAI").classList.remove("hidden");$("loadAI").disabled=false;await refreshAIStatus();checkHealth();};
+
 
 (async()=>{try{const sessionInfo=await api("/api/session");if(sessionInfo.authenticated)await showWorkspace();else showLogin();}catch(_){showLogin();}})();
 </script>
