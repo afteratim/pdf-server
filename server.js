@@ -9,6 +9,8 @@ const PgSession = require('connect-pg-simple')(session);
 const { Pool } = require('pg');
 
 const app = express();
+// Render terminates HTTPS at its proxy; trust the single proxy hop so secure cookies work.
+app.set('trust proxy', 1);
 const PORT = Number(process.env.PORT || 10000);
 const PASSWORD = process.env.APP_PASSWORD || '';
 const SESSION_SECRET = process.env.SESSION_SECRET || '';
@@ -57,7 +59,7 @@ app.use(session({
   rolling: true,
   cookie: {
     httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
+    secure: 'auto',
     sameSite: 'lax',
     maxAge: 30 * 24 * 60 * 60 * 1000
   }
