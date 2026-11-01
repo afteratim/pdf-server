@@ -2,7 +2,7 @@
   "name": "personal-pdf-analyzer",
   "version": "3.1.0",
   "private": true,
-  "description": "Private PDF analyzer with Neon persistence and temporary local PDF storage",
+  "description": "Private PDF analyzer with Neon persistence, temporary local PDF storage and low-memory llama.cpp AI",
   "main": "server.js",
   "scripts": {
     "start": "node --expose-gc server.js",
@@ -12,7 +12,6 @@
     "node": ">=20"
   },
   "dependencies": {
-    "@huggingface/transformers": "3.7.2",
     "connect-pg-simple": "^10.0.0",
     "express": "^5.1.0",
     "express-session": "^1.18.2",
