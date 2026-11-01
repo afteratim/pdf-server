@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Personal PDF Analyzer</title>
+<style>
+:root{--navy:#111827;--blue:#2563eb;--bg:#f3f5f9;--line:#e5e9f0;--muted:#64748b;--green:#15803d;--red:#dc2626;--amber:#b45309}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:#172033;font-family:Inter,system-ui,Arial,sans-serif}header{height:66px;background:var(--navy);color:#fff;padding:0 22px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:5}.brand{font-weight:750;font-size:18px}.brand span{color:#93c5fd}button,input,textarea{font:inherit}button{border:0;border-radius:9px;padding:10px 15px;background:var(--blue);color:#fff;font-weight:650;cursor:pointer}button:disabled{opacity:.55;cursor:not-allowed}.btn-light{background:#e9eef8;color:#26364f}.btn-dark{background:#334155}.btn-small{padding:7px 10px;font-size:12px}main{max-width:1380px;margin:22px auto;padding:0 16px}.card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:18px;margin-bottom:16px;box-shadow:0 3px 12px #17203308}h2,h3,h4,p{margin-top:0}h3{font-size:16px;margin-bottom:8px}.muted,.hint{color:var(--muted);font-size:13px}.hidden{display:none!important}#login{max-width:430px;margin:70px auto}input[type=password]{width:100%;border:1px solid #cbd5e1;border-radius:9px;padding:12px;margin:8px 0 12px}.layout{display:grid;grid-template-columns:330px minmax(0,1fr);gap:16px;align-items:start}.sidebar{position:sticky;top:82px}.drop{border:2px dashed #b8c5d9;background:#f8fafc;padding:20px 12px;text-align:center;border-radius:11px;margin:13px 0}.drop input{max-width:100%;margin-top:12px}.file-list{display:grid;gap:9px;margin-top:12px}.file-item{border:1px solid var(--line);border-radius:10px;padding:11px;font-size:12px;overflow-wrap:anywhere}.file-item strong{display:block;font-size:13px;margin-bottom:5px}.ok{color:var(--green)}.bad{color:var(--red)}.review{color:var(--amber)}.progress{height:7px;background:#e8edf5;border-radius:20px;overflow:hidden;margin-top:12px}.progress>div{height:100%;width:0;background:var(--blue);transition:width .2s}.status{font-size:12px;color:var(--muted);margin-top:8px;min-height:16px}.report{margin-top:9px;border-top:1px solid var(--line);padding-top:9px}.report summary{cursor:pointer;font-weight:700;color:#334155}.report-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;margin:9px 0}.report-stat{background:#f7f9fc;padding:8px;border-radius:8px}.report-stat b{display:block;font-size:16px}.report-stat span{font-size:11px;color:var(--muted)}.warning{background:#fff7ed;border:1px solid #fed7aa;color:#9a3412;padding:10px;border-radius:9px;font-size:12px;margin-top:10px}.chat-card{min-height:700px;display:flex;flex-direction:column;padding:0;overflow:hidden}.chat-head{padding:16px 19px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;gap:12px}.chat-head h3{margin:0}.chat-body{padding:18px;flex:1;min-height:420px;max-height:calc(100vh - 320px);overflow:auto;background:#fbfcfe}.welcome{text-align:center;max-width:650px;margin:42px auto;color:#475569}.welcome .emoji{font-size:34px;margin-bottom:12px}.welcome h2{color:#172033;font-size:22px;margin-bottom:8px}.quick-actions{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-start;margin:0 0 12px}.quick-actions button{background:#eef3ff;color:#244b9b;border:1px solid #dce6ff;font-size:12px;font-weight:600;padding:8px 11px}.message{display:flex;margin:0 0 18px;gap:10px;align-items:flex-start}.message.user{justify-content:flex-end}.bubble{max-width:96%;border-radius:13px;padding:12px 14px;line-height:1.5;font-size:14px;overflow-wrap:anywhere}.user .bubble{background:#e7efff;color:#173b7a;border:1px solid #d8e5ff}.assistant .bubble{background:#fff;border:1px solid var(--line);width:100%}.avatar{width:29px;height:29px;border-radius:50%;display:grid;place-items:center;flex:none;background:#e8efff;color:#2455a5;font-size:13px;font-weight:800}.user .avatar{display:none}.bubble p{margin:7px 0}.table-wrap{overflow:auto;margin:10px 0;border:1px solid var(--line);border-radius:8px}table{border-collapse:collapse;width:100%;font-size:12px;white-space:nowrap}th,td{text-align:left;padding:9px 11px;border-bottom:1px solid var(--line);vertical-align:top}th{background:#f1f5f9;font-weight:700;color:#334155}tr:last-child td{border-bottom:0}.source{font-size:11px;color:#64748b;margin-top:8px}.chat-compose{border-top:1px solid var(--line);padding:14px;background:#fff}.compose-row{display:flex;gap:9px;align-items:flex-end}.compose-row textarea{flex:1;resize:vertical;min-height:50px;max-height:150px;border:1px solid #cbd5e1;border-radius:10px;padding:12px;font:inherit;font-size:14px}.compose-note{font-size:11px;color:#94a3b8;margin-top:7px}.toolbar{display:flex;gap:8px;flex-wrap:wrap}.pill{display:inline-flex;padding:4px 8px;border-radius:20px;background:#eef2ff;color:#3b50a0;font-size:11px;font-weight:650}.empty-docs{font-size:12px;color:#94a3b8;padding:8px 0}.ai-panel{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;background:#f7f8fc;border:1px solid var(--line);border-radius:10px;padding:10px;margin-bottom:12px}.ai-status{font-size:12px;color:var(--muted)}.source-snippet{white-space:normal;min-width:220px;max-width:440px;color:#475569}.small-note{font-size:11px;color:#64748b}.stage{font-size:12px;color:#1d4ed8;margin-top:7px}.report-warnings{padding-left:18px;color:#92400e;font-size:11px;margin:6px 0}.badge-good{color:#166534;background:#dcfce7}.badge-review{color:#92400e;background:#fef3c7}.badge{display:inline-block;padding:3px 7px;border-radius:20px;font-size:10px;font-weight:700}.error-text{color:#b91c1c}
+/* Phase 2.2 analysis animation */
+.processing-card{display:none;margin-top:12px;padding:12px;border:1px solid #bfdbfe;background:#eff6ff;border-radius:11px}.processing-card.active{display:block}.processing-top{display:flex;align-items:center;gap:10px}.scan-spinner{width:24px;height:24px;border:3px solid #bfdbfe;border-top-color:#2563eb;border-radius:50%;animation:spin .8s linear infinite;flex:none}.scan-track{height:5px;background:#dbeafe;border-radius:20px;overflow:hidden;margin-top:10px}.scan-track:after{content:"";display:block;width:35%;height:100%;background:#2563eb;border-radius:20px;animation:scan 1.5s ease-in-out infinite}.processing-steps{display:flex;gap:6px;flex-wrap:wrap;margin-top:9px}.processing-steps span{font-size:10px;padding:4px 7px;border-radius:20px;background:#dbeafe;color:#1e40af}.processing-steps span.current{background:#1d4ed8;color:white}@keyframes spin{to{transform:rotate(360deg)}}@keyframes scan{0%{transform:translateX(-110%)}100%{transform:translateX(320%)}}.ai-controls{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.ai-controls select{max-width:270px;border:1px solid #cbd5e1;border-radius:8px;padding:8px;background:white;color:#172033}.ai-model-note{font-size:11px;color:#64748b;margin-top:7px}
+@media(max-width:900px){.layout{grid-template-columns:1fr}.sidebar{position:static}.chat-card{min-height:600px}.chat-body{max-height:none}.chat-head{align-items:flex-start;flex-direction:column}.quick-actions{flex-wrap:nowrap;overflow-x:auto;padding-bottom:5px}.quick-actions button{white-space:nowrap}}
+</style>
+</head>
+<body>
+<header><div class="brand">📄 Personal <span>PDF Analyzer</span></div><button id="logout" class="btn-dark hidden">Logout</button></header>
+<main>
+<div style="max-width:1380px;margin:0 auto 12px;padding:10px 14px;background:#fff7ed;border:1px solid #fed7aa;border-radius:10px;color:#9a3412;font-size:12px">Temporary PDF storage: original files are stored on Render and may disappear after a restart or redeploy. Extracted text and chat history are saved in Neon.</div>
+<section id="login" class="card"><h2>Welcome back</h2><p class="muted">Sign in to your private PDF workspace.</p><input id="password" type="password" placeholder="Workspace password" autocomplete="current-password"><button id="loginBtn">Login</button><div id="loginStatus" class="status"></div></section>
+<section id="workspace" class="hidden"><div class="layout">
+<aside class="sidebar">
+ <div class="card"><h3>Documents</h3><p class="hint">Chat searches all PDFs saved to your private account.</p>
+  <div class="drop"><strong>Upload PDF files</strong><div class="hint">Up to 200 MB per file · multiple files supported</div><input id="files" type="file" accept=".pdf,application/pdf" multiple></div>
+  <button id="analyzeBtn" style="width:100%">Upload & process</button><div class="progress"><div id="progressBar"></div></div><div id="uploadStatus" class="status"></div><div id="processingStage" class="stage"></div><div id="processingCard" class="processing-card" aria-live="polite"><div class="processing-top"><div class="scan-spinner"></div><div><strong id="processingTitle">Analyzing PDF</strong><div id="processingDetail" class="small-note">Please keep this tab open while the PDF is processed.</div></div></div><div class="scan-track"></div><div class="processing-steps"><span class="current">1 · Upload</span><span>2 · Validate</span><span>3 · Extract text</span><span>4 · OCR</span><span>5 · Report</span></div></div>
+  <div id="fileList" class="file-list"><div class="empty-docs">No documents uploaded yet.</div></div>
+  <div class="report" style="margin-top:12px"><strong>Combined extraction statistics</strong><div id="collectionReport" class="small-note" aria-live="polite">Upload PDFs to see combined extraction statistics.</div></div>
+  <div class="toolbar" style="margin-top:12px"><button id="clearDocs" class="btn-light btn-small">Clear documents</button></div>
+  <div class="warning">Original PDFs are stored privately in object storage. Extracted text, reports and chat history are saved in the database and remain available after refreshes and deployments. Log in from another device to access the same workspace.</div>
+ </div>
+ <div class="card"><h3>Server status</h3><div id="serverInfo" class="hint">Checking server...</div></div>
+</aside>
+<section class="card chat-card">
+ <div class="chat-head"><div><h3>Chat with your PDFs</h3><div class="hint" id="scopeText">No documents loaded · Upload PDFs to begin</div></div><div class="toolbar"><button id="exportChat" class="btn-light btn-small">Export chat</button><button id="clearChat" class="btn-light btn-small">Clear chat</button></div></div>
+ <div id="chatBody" class="chat-body"><div class="welcome" id="welcome"><div class="emoji">💬</div><h2>Ask anything about your PDFs</h2><p>Upload documents, then use the quick actions or ask your own question. Results search all uploaded PDFs.</p></div></div>
+ <div class="chat-compose">
+  <div class="ai-panel"><div><strong style="font-size:13px">Server-side AI assistant</strong><div id="aiStatus" class="ai-status">AI off · deterministic extraction is ready</div></div><div class="ai-controls"><select id="modelSelect" aria-label="Select local AI model"><option value="smollm">SmolLM2 360M · quantized</option></select><button id="loadAI" class="btn-light btn-small">Load server model</button><button id="disableAI" class="btn-light btn-small hidden">Unload AI</button></div></div>
+  <div class="ai-model-note">The model is included in the server image and runs on Render, not on your device. Only one model is supported in this first build. Loading may exceed Render Free memory; if it fails, document search and extraction will continue to work.</div>
+  <div class="quick-actions" id="quickActions">
+   <button data-q="Extract all bill numbers from all uploaded PDFs">Extract bill numbers</button><button data-q="Find all invoice dates">Find invoice dates</button><button data-q="Extract all GSTIN numbers">Find GSTINs</button><button data-q="Find duplicate bill numbers">Find duplicates</button><button data-q="Extract all invoice amounts">Extract amounts</button><button data-q="Find all party names">Find party names</button><button data-q="Compare bill numbers across all PDFs">Compare PDFs</button><button data-q="Summarize all uploaded PDFs">Summarize documents</button>
+  </div>
+  <div class="compose-row"><textarea id="question" placeholder="Ask a question about all uploaded PDFs... (Enter to send, Shift+Enter for new line)"></textarea><button id="sendBtn">Send</button></div><div class="compose-note">Balanced answers: exact fields use extraction rules; optional AI can explain retrieved evidence. Verify important financial values against the original page.</div>
+ </div>
+</section>
+</div></section>
+</main>
+<script>
+const $ = id => document.getElementById(id);
+let documents = [];
+let conversation = [];
+let aiLoading = false;
+let activeModelId = "";
+
+async function api(url, options={}){
+ const response=await fetch(url,{credentials:"same-origin",...options,headers:{...(options.headers||{}),...(options.body instanceof FormData?{}:{"Content-Type":"application/json"})}});
+ let data={};try{data=await response.json();}catch(_){}
+ if(response.status===401){showLogin();throw new Error("Your login session expired. Please login again.");}
+ if(!response.ok)throw new Error(data.error||`Request failed (${response.status})`);
+ return data;
+}
+async function showWorkspace(){
+ $("login").classList.add("hidden");$("workspace").classList.remove("hidden");$("logout").classList.remove("hidden");
+ try{const state=await api("/api/state");documents=state.documents||[];conversation=(state.messages||[]).map(msg=>({role:msg.role,text:msg.content}));$("chatBody").replaceChildren();
+  if(!state.messages?.length){const welcome=document.createElement("div");welcome.id="welcome";welcome.className="welcome";welcome.innerHTML='<div class="emoji">💬</div><h2>Ask anything about your PDFs</h2><p>Your saved PDFs are searched together.</p>';$("chatBody").append(welcome);}
+  else{for(const msg of state.messages){if(msg.role==="assistant"&&msg.result)addStructuredMessage(msg.result,false);else addMessage(msg.role,msg.content,false);}}
+  updateDocumentUI();await refreshAIStatus();checkHealth();
+ }catch(error){$("uploadStatus").textContent=error.message;}
+}
+function showLogin(){$("workspace").classList.add("hidden");$("login").classList.remove("hidden");$("logout").classList.add("hidden");}
+async function login(){
+ $("loginStatus").textContent="Checking...";
+ try{await api("/api/login",{method:"POST",body:JSON.stringify({password:$("password").value})});$("password").value="";await showWorkspace();}
+ catch(error){$("loginStatus").textContent=error.message;$("loginStatus").className="status error-text";}
+}
+$("loginBtn").onclick=login;$("password").addEventListener("keydown",e=>{if(e.key==="Enter")login();});
+$("logout").onclick=async()=>{try{await api("/api/logout",{method:"POST"});}catch(_){}documents=[];conversation=[];showLogin();};
+async function checkHealth(){try{const d=await api("/api/health");$("serverInfo").textContent=`Online · RAM ${d.memory_mb} MB · database ${d.database} · uptime ${d.uptime_seconds}s`;}catch(_){$("serverInfo").textContent="Server unavailable";}}
+
+function updateDocumentUI(){
+ const list=$("fileList");list.replaceChildren();
+ if(!documents.length){const empty=document.createElement("div");empty.className="empty-docs";empty.textContent="No documents uploaded yet.";list.append(empty);}
+ documents.forEach((doc,index)=>{
+  const item=document.createElement("div");item.className="file-item";
+  const name=document.createElement("strong");name.textContent=doc.filename;
+  const quality=doc.report?.status||"review";
+  const meta=document.createElement("div");meta.className=quality==="good"?"ok":"review";meta.textContent=`${doc.pageCount} pages · ${doc.size_mb} MB · ${quality==="good"?"Good extraction":"Review recommended"}`;
+  const actions=document.createElement("div");actions.className="toolbar";actions.style.marginTop="7px";
+  const download=document.createElement("button");download.className="btn-light btn-small";download.textContent="Download original";download.onclick=()=>{window.location.href=`/api/documents/${doc.id}/download`;};
+  const remove=document.createElement("button");remove.className="btn-light btn-small";remove.textContent="Delete permanently";remove.onclick=async()=>{if(!confirm(`Delete ${doc.filename} and its saved extracted text?`))return;try{await api(`/api/documents/${doc.id}`,{method:"DELETE"});documents=documents.filter(x=>x.id!==doc.id);updateDocumentUI();}catch(e){alert(e.message);}};
+  actions.append(download,remove);
+  const details=document.createElement("details");details.className="report";const summary=document.createElement("summary");summary.textContent="View extraction report";details.append(summary,buildReport(doc));
+  item.append(name,meta,actions,details);list.append(item);
+ });
+ $("scopeText").textContent=documents.length?`${documents.length} document(s) loaded · Searching all documents`:"No documents loaded · Upload PDFs to begin";
+ const cr=$("collectionReport");
+ if(!cr)return; // Keep document upload successful even if the optional dashboard panel is absent.
+ if(!documents.length){cr.textContent="Upload PDFs to see combined extraction statistics.";return;}
+ const sum=key=>documents.reduce((n,d)=>n+Number(d.report?.[key]??0),0);
+ const fields=documents.reduce((a,d)=>{const f=d.report?.fieldCounts||{};a.bills+=Number(f.billNumbers||0);a.gstins+=Number(f.gstins||0);a.dates+=Number(f.dates||0);a.amounts+=Number(f.labelledAmounts||0);return a;},{bills:0,gstins:0,dates:0,amounts:0});
+ const unreadable=sum("unreadablePages"),review=documents.filter(d=>d.report?.status!=="good").length;
+ cr.textContent=`${documents.length} PDFs · ${documents.reduce((n,d)=>n+Number(d.pageCount||0),0)} pages · ${sum("nativePages")} native · ${sum("ocrPages")} OCR · ${unreadable} unreadable · ${fields.bills} bill numbers · ${fields.gstins} GSTINs · ${fields.dates} dates · ${fields.amounts} labelled amounts · ${review} document(s) need review.`;
+}
+function buildReport(doc){
+ const report=doc.report||{};const wrap=document.createElement("div");
+ const grid=document.createElement("div");grid.className="report-grid";
+ const stats=[ ["Pages",report.totalPages??doc.pageCount??0],["Native text",report.nativePages??0],["OCR pages",report.ocrPages??doc.ocrPagesProcessed??0],["Unreadable",report.unreadablePages??0],["Table-like pages",report.tableLikePages??0],["Bill numbers",report.fieldCounts?.billNumbers??0],["GSTINs",report.fieldCounts?.gstins??0],["Dates",report.fieldCounts?.dates??0],["Labelled amounts",report.fieldCounts?.labelledAmounts??0] ];
+ stats.forEach(([label,value])=>{const box=document.createElement("div");box.className="report-stat";const b=document.createElement("b");b.textContent=value;const s=document.createElement("span");s.textContent=label;box.append(b,s);grid.append(box);});
+ const integrity=document.createElement("div");integrity.className="small-note";integrity.textContent=`PDF integrity: ${report.pdfIntegrity||"checked"} · Text extraction: ${report.textExtraction||"completed"}`;wrap.append(grid,integrity);
+ if(report.warnings?.length){const ul=document.createElement("ul");ul.className="report-warnings";report.warnings.forEach(w=>{const li=document.createElement("li");li.textContent=w;ul.append(li);});wrap.append(ul);}
+ const pageDetails=document.createElement("details");pageDetails.style.marginTop="8px";const ps=document.createElement("summary");ps.textContent="Page-by-page details";pageDetails.append(ps);
+ const table=document.createElement("table");const head=document.createElement("tr");["Page","Method","Characters","Fields","Status"].forEach(x=>{const th=document.createElement("th");th.textContent=x;head.append(th);});table.append(head);
+ (doc.pages||[]).forEach(p=>{const tr=document.createElement("tr");const values=[p.page,p.source,p.characterCount??(p.text||"").length,`Bills ${p.extracted?.billNumberCount??"-"} · GSTIN ${p.extracted?.gstinCount??"-"} · Dates ${p.extracted?.dateCount??"-"}`,p.source==="unreadable"?"Review":p.source==="ocr"?"OCR – verify":"Extracted"];values.forEach(v=>{const td=document.createElement("td");td.textContent=v;tr.append(td);});table.append(tr);});
+ const tw=document.createElement("div");tw.className="table-wrap";tw.append(table);pageDetails.append(tw);wrap.append(pageDetails);return wrap;
+}
+
+function uploadOne(file){return new Promise((resolve,reject)=>{
+ const xhr=new XMLHttpRequest(),form=new FormData();form.append("pdf",file);xhr.open("POST","/api/analyze");xhr.withCredentials=true;
+ xhr.upload.onprogress=e=>{if(e.lengthComputable){const p=Math.round(e.loaded/e.total*100);$("progressBar").style.width=p+"%";$("uploadStatus").textContent=`Uploading ${file.name}: ${p}%`;if(p===100){$("processingStage").textContent="Upload complete · server is validating, extracting text and running OCR...";$("processingTitle").textContent="Analyzing PDF on server";}}};
+ xhr.onload=()=>{let data;try{data=JSON.parse(xhr.responseText);}catch(_){return reject(new Error("Invalid server response."));}if(xhr.status===401){showLogin();return reject(new Error("Login session expired. Please login again."));}if(xhr.status<200||xhr.status>=300)return reject(new Error(data.error||"Processing failed."));resolve(data);};
+ xhr.onerror=()=>reject(new Error("Network connection failed."));xhr.ontimeout=()=>reject(new Error("Request timed out."));xhr.timeout=0;xhr.send(form);
+});}
+$("analyzeBtn").onclick=async()=>{
+ const files=Array.from($("files").files);if(!files.length){alert("Select at least one PDF.");return;}if(files.some(f=>!f.name.toLowerCase().endsWith(".pdf")||f.size>200*1024*1024)){alert("Only PDF files up to 200 MB each are accepted.");return;}
+ $("analyzeBtn").disabled=true;$("processingCard").classList.add("active");let done=0;const failures=[];let started=Date.now();
+ const ticker=setInterval(()=>{const sec=Math.floor((Date.now()-started)/1000);$("processingDetail").textContent=`${files[done]?.name||"PDF"} · ${sec}s elapsed · waiting for extraction/OCR result`;},1000);
+ for(const file of files){started=Date.now();$("progressBar").style.width="0%";$("processingStage").textContent="Starting upload...";$("processingTitle").textContent=`Analyzing ${file.name}`;$("processingDetail").textContent="Uploading, then validating and extracting text/OCR...";$("uploadStatus").textContent=`Preparing ${file.name}...`;
+  try{const data=await uploadOne(file);documents.push(data);done++;updateDocumentUI();$("processingTitle").textContent=`Completed · ${file.name}`;$("processingDetail").textContent=`${data.pageCount} page(s) analyzed · ${data.report?.nativePages||0} native · ${data.report?.ocrPages||0} OCR`;$("processingStage").textContent=`${file.name}: extraction complete · report ready`;}catch(error){failures.push(`${file.name}: ${error.message}`);$("processingTitle").textContent=`Could not process ${file.name}`;$("processingDetail").textContent=error.message;$("processingStage").textContent="Processing failed for this file.";}
+ }
+ clearInterval(ticker);$("uploadStatus").textContent=`${done} of ${files.length} document(s) processed.`+(failures.length?" Errors: "+failures.join(" | "):"");$("progressBar").style.width="100%";$("analyzeBtn").disabled=false;$("files").value="";$("processingCard").classList.remove("active");checkHealth();
+ if(done&&conversation.length===0)addMessage("assistant",`Ready. I have indexed ${done} document(s). Use the quick actions or ask questions across all uploaded PDFs.`);
+};
+$("clearDocs").onclick=async()=>{if(!documents.length)return;if(confirm("Permanently delete all saved PDFs and extracted text?")){try{await api("/api/documents",{method:"DELETE"});documents=[];updateDocumentUI();}catch(e){alert(e.message);}}};
+
+function addMessage(role,text,persist=true){const welcome=$("welcome");if(welcome)welcome.classList.add("hidden");const row=document.createElement("div");row.className=`message ${role}`;if(role==="assistant"){const avatar=document.createElement("div");avatar.className="avatar";avatar.textContent="AI";row.append(avatar);}const bubble=document.createElement("div");bubble.className="bubble";const p=document.createElement("p");p.textContent=text;bubble.append(p);row.append(bubble);$("chatBody").append(row);$("chatBody").scrollTop=$("chatBody").scrollHeight;if(persist)conversation.push({role,text});}
+function makeTable(headers,rows){const wrap=document.createElement("div");wrap.className="table-wrap";const table=document.createElement("table"),thead=document.createElement("thead"),tr=document.createElement("tr");headers.forEach(h=>{const th=document.createElement("th");th.textContent=h;tr.append(th);});thead.append(tr);table.append(thead);const tbody=document.createElement("tbody");rows.forEach(row=>{const tr=document.createElement("tr");row.forEach(value=>{const td=document.createElement("td");td.textContent=String(value??"");tr.append(td);});tbody.append(tr);});table.append(tbody);wrap.append(table);return wrap;}
+function addStructuredMessage(answer,persist=true){
+ const welcome=$("welcome");if(welcome)welcome.classList.add("hidden");const row=document.createElement("div");row.className="message assistant";const avatar=document.createElement("div");avatar.className="avatar";avatar.textContent="AI";const bubble=document.createElement("div");bubble.className="bubble";
+ const title=document.createElement("strong");title.textContent=answer.title;bubble.append(title);const p=document.createElement("p");p.textContent=answer.paragraph||"";bubble.append(p);
+ if(answer.headers&&answer.rows?.length){bubble.append(makeTable(answer.headers,answer.rows));const note=document.createElement("div");note.className="source";note.textContent=`${answer.rows.length} result(s). Original text snippets and PDF page references are included where available.`;bubble.append(note);const csv=document.createElement("button");csv.className="btn-light btn-small";csv.style.marginTop="9px";csv.textContent="Download CSV";csv.onclick=()=>downloadCSV(answer.headers,answer.rows,answer.name||"pdf-results");bubble.append(csv);}
+ if(answer.aiText){const ai=document.createElement("p");ai.style.marginTop="10px";ai.textContent="Server AI explanation: "+answer.aiText;bubble.append(ai);}
+ row.append(avatar,bubble);$("chatBody").append(row);$("chatBody").scrollTop=$("chatBody").scrollHeight;if(persist)conversation.push({role:"assistant",text:answer.title+"\n"+answer.paragraph+"\n"+(answer.rows||[]).map(r=>r.join(" | ")).join("\n")+(answer.aiText?"\nAI: "+answer.aiText:"")});
+}
+function downloadCSV(headers,rows,name){const esc=v=>'"'+String(v??"").replace(/"/g,'""')+'"';const csv=[headers.map(esc).join(","),...rows.map(r=>r.map(esc).join(","))].join("\r\n");const blob=new Blob(["\ufeff"+csv],{type:"text/csv;charset=utf-8"});const url=URL.createObjectURL(blob);const a=document.createElement("a");a.href=url;a.download=name.replace(/[^a-z0-9_-]/gi,"_")+".csv";a.click();URL.revokeObjectURL(url);}
+function allPages(){const out=[];documents.forEach(doc=>(doc.pages||[]).forEach(page=>out.push({filename:doc.filename,page:page.page,text:page.text||""})));return out;}
+function normalize(s){return String(s||"").toUpperCase().replace(/[^A-Z0-9]/g,"");}
+function uniqueRecords(records){const seen=new Set();return records.filter(r=>{const key=normalize(r.value)+"|"+r.filename+"|"+r.page;if(!r.value||seen.has(key))return false;seen.add(key);return true;});}
+function record(value,p,context){return {value:String(value||"").trim(),filename:p.filename,page:p.page,snippet:String(context||"").trim().slice(0,260)};}
+function getBillNumbers(){
+ const out=[];
+ // Only capture values immediately following invoice/bill/voucher labels. Exclude E-way bill labels and copy descriptors.
+ const labelRe=/(?:invoice\s*(?:no\.?|number|#)|inv\.?\s*(?:no\.?|number|#)|bill\s*(?:no\.?|number|#)|voucher\s*(?:no\.?|number|#)|gr\/rr\s*no\.?\s*[:\-]?\s*invoice\s*(?:no\.?|number|#))\s*[:#\-]?\s*([A-Z0-9][A-Z0-9./_-]{1,})/gi;
+ const excluded=/^(?:ORIGINAL|DUPLICATE|TRIPLICATE|QUADRUPLICATE|COPY|TAX|INVOICE|BILL|EWAY|TERMS|CONDITIONS|SIGNATURE|RECEIVER|RECEIVERS|SUPPLIER|CUSTOMER|BUYER|SELLER)$/i;
+ for(const p of allPages())for(const line of p.text.split(/\r?\n/)){if(/e[- ]?way\s*bill/i.test(line))continue;for(const m of line.matchAll(labelRe)){let value=m[1].replace(/[.,;:]$/,'');if(excluded.test(value)||/^\d{1,2}[-/.]\d{1,2}[-/.]\d{2,4}$/.test(value))continue;out.push(record(value,p,line));}}
+ return uniqueRecords(out);
+}
+function getGSTINs(){const out=[],re=/\b[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z][1-9A-Z]Z[0-9A-Z]\b/gi;for(const p of allPages())for(const m of p.text.matchAll(re)){const start=Math.max(0,m.index-65);out.push(record(m[0].toUpperCase(),p,p.text.slice(start,m.index+90)));}return uniqueRecords(out);}
+function parseDateValue(value){const v=String(value).trim().replace(/[.]/g,'/').replace(/-/g,'/');let m=v.match(/^(\d{1,2})\/(\d{1,2})\/(\d{2}|\d{4})$/);if(m){let d=+m[1],mo=+m[2],y=+m[3];if(y<100)y+=y<50?2000:1900;if(d>31||mo>12||d<1||mo<1)return false;const dt=new Date(y,mo-1,d);return dt.getFullYear()===y&&dt.getMonth()===mo-1&&dt.getDate()===d;}m=v.match(/^(\d{4})\/(\d{1,2})\/(\d{1,2})$/);if(m){let y=+m[1],mo=+m[2],d=+m[3];const dt=new Date(y,mo-1,d);return mo>=1&&mo<=12&&d>=1&&dt.getFullYear()===y&&dt.getMonth()===mo-1&&dt.getDate()===d;}return false;}
+function getDates(){
+ const out=[];const numeric=/\b(?:0?[1-9]|[12]\d|3[01])[-/.](?:0?[1-9]|1[0-2])[-/.](?:19|20)?\d{2}\b|\b(?:19|20)\d{2}[-/.](?:0?[1-9]|1[0-2])[-/.](?:0?[1-9]|[12]\d|3[01])\b/g;
+ const monthNames=/\b(?:0?[1-9]|[12]\d|3[01])\s+(?:Jan(?:uary)?|Feb(?:ruary)?|Mar(?:ch)?|Apr(?:il)?|May|Jun(?:e)?|Jul(?:y)?|Aug(?:ust)?|Sep(?:tember)?|Oct(?:ober)?|Nov(?:ember)?|Dec(?:ember)?)\.?\s*,?\s*(?:19|20)\d{2}\b|\b(?:Jan(?:uary)?|Feb(?:ruary)?|Mar(?:ch)?|Apr(?:il)?|May|Jun(?:e)?|Jul(?:y)?|Aug(?:ust)?|Sep(?:tember)?|Oct(?:ober)?|Nov(?:ember)?|Dec(?:ember)?)\.?\s+(?:0?[1-9]|[12]\d|3[01])\s*,?\s*(?:19|20)\d{2}\b/gi;
+ const labels=[['Invoice date',/\b(?:invoice\s*date|inv\.?\s*date|bill\s*date|document\s*date)\b/i],['Due date',/\b(?:due\s*date|payment\s*due)\b/i],['Other date',/\b(?:date|dated|dispatch\s*date|delivery\s*date|order\s*date|challan\s*date|eway\s*date)\b/i]];
+ for(const p of allPages())for(const line of p.text.split(/\r?\n/)){let type='Date';for(const [label,re] of labels)if(re.test(line)){type=label;break;}for(const m of [...line.matchAll(numeric),...line.matchAll(monthNames)]){if(parseDateValue(m[0])||monthNames.test(m[0]))out.push({...record(m[0],p,line),dateType:type});}}
+ const seen=new Set();return out.filter(r=>{const k=r.value+'|'+r.filename+'|'+r.page;if(seen.has(k))return false;seen.add(k);return true;});
+}
+function getAmounts(){
+ const out=[];
+ const labels=[['Invoice total',/\b(?:invoice\s*value|invoice\s*total|total\s*invoice\s*value)\b/i],['Grand total',/\bgrand\s*total\b/i],['Taxable value',/\btaxable\s*(?:value|amount)\b/i],['CGST',/\bcentral\s*gst|\bcgst\b/i],['SGST',/\bstate\s*gst|\bsgst\b/i],['IGST',/\bintegrated\s*gst|\bigst\b/i],['Amount payable',/\b(?:amount\s*payable|net\s*payable|balance\s*due|net\s*amount)\b/i],['Other total',/\b(?:total\s*amount|total\s*value|amount\s*due)\b/i]];
+ const money=/(?:₹|INR\s*|Rs\.?\s*)?([0-9]{1,3}(?:,[0-9]{2,3})*(?:\.[0-9]{1,2})?|[0-9]+\.[0-9]{1,2})\b(?!\s*%)/g;
+ for(const p of allPages())for(const line of p.text.split(/\r?\n/)){let type='Amount';for(const [label,re] of labels)if(re.test(line)){type=label;break;}if(type==='Amount')continue;for(const m of line.matchAll(money)){const val=m[1].replace(/,/g,'');if(Number(val)>0)out.push({...record(m[1],p,line),amountType:type});}}
+ const seen=new Set();return out.filter(r=>{const k=r.amountType+'|'+r.value+'|'+r.filename+'|'+r.page;if(seen.has(k))return false;seen.add(k);return true;});
+}
+function getPartyNames(){const out=[],re=/(?:supplier\s*name|buyer\s*name|consignee|bill\s*to|ship\s*to|party\s*name|name\s*of\s*(?:the\s*)?(?:party|supplier|recipient))\s*[:\-]?\s*([^\n]{3,90})/gi;for(const p of allPages())for(const m of p.text.matchAll(re)){out.push(record(m[1].trim(),p,m[0]));}return uniqueRecords(out);}
+function duplicateGroups(records){const groups=new Map();records.forEach(r=>{const key=normalize(r.value);if(!groups.has(key))groups.set(key,[]);groups.get(key).push(r);});return [...groups.values()].filter(g=>g.length>1);}
+function rowsWithSources(records){return records.map(r=>[r.value,r.filename,r.page,r.snippet]);}
+function searchLines(question){const stop=new Set("the and for from with that this what find show give tell please document documents pdf uploaded all about where does have has are was were bill invoice number extract list every each across my your tell me get details of is in on at to by".split(" "));const terms=question.toLowerCase().replace(/[^a-z0-9\s.-]/g," ").split(/\s+/).filter(w=>w.length>2&&!stop.has(w));const hits=[];for(const p of allPages())for(const line of p.text.split(/\r?\n/)){const lower=line.toLowerCase(),matched=terms.filter(t=>lower.includes(t));if(matched.length)hits.push({record:record(line.trim(),p,line),score:matched.length});}return hits.sort((a,b)=>b.score-a.score).slice(0,100).map(x=>x.record);}
+function answerQuestion(question){
+ const q=question.toLowerCase(),pages=allPages();if(!documents.length)return {title:"No PDFs uploaded",paragraph:"Upload one or more PDFs first. All successfully processed documents will be searched together."};
+ if(/duplicate|duplicated/.test(q)){const groups=duplicateGroups(getBillNumbers()),records=groups.flat();return {title:`Found ${groups.length} duplicate bill-number group(s)`,paragraph:groups.length?"These normalized bill or invoice numbers were detected more than once. Check the snippets to confirm they refer to the same bill.":"No duplicate labelled bill numbers were detected by the current extraction rules.",headers:["Bill / Invoice No.","PDF","Page","Original text snippet"],rows:rowsWithSources(records),name:"duplicate-bills"};}
+ if(/compare|comparison|missing from|common in|difference between/.test(q)){if(documents.length<2)return {title:"Upload at least two PDFs",paragraph:"Comparison requires at least two successfully processed PDFs."};const billRecords=getBillNumbers(),perDoc=documents.map(d=>({doc:d,ids:billRecords.filter(r=>r.filename===d.filename)})),all=new Set(perDoc.flatMap(x=>x.ids.map(r=>normalize(r.value))));const rows=[...all].map(id=>[id,...perDoc.map(x=>x.ids.some(r=>normalize(r.value)===id)?"Detected":"Not detected")]);return {title:"Bill-number comparison across all PDFs",paragraph:"This compares detected bill numbers. ‘Not detected’ means the extraction rules did not find that number in that PDF; it does not prove the original document lacks it.",headers:["Bill / Invoice No.",...perDoc.map(x=>x.doc.filename)],rows,name:"pdf-comparison"};}
+ if(/gstin|gst no|gst number|gst registration/.test(q)){const r=getGSTINs();return {title:`Found ${r.length} GSTIN occurrence(s)`,paragraph:"Values match the standard 15-character Indian GSTIN pattern. This is format validation, not government registration verification.",headers:["GSTIN","PDF","Page","Original text snippet"],rows:rowsWithSources(r),name:"gstin-list"};}
+ if(/\b(date|dates)\b/.test(q)&&/(invoice|bill|all|extract|list|find)/.test(q)){const r=getDates();return {title:`Found ${r.length} date occurrence(s)`,paragraph:"Detected numeric dates. The snippet helps distinguish invoice dates from due dates, dispatch dates and other dates.",headers:["Date","Date type","PDF","Page","Original text snippet"],rows:r.map(x=>[x.value,x.dateType,x.filename,x.page,x.snippet]),evidence:r,name:"dates-list"};}
+ if(/\b(bill|invoice|voucher|eway|e-way)\b/.test(q)&&/(number|no\.?|nos\.?|extract|list|all|many|count|bill nos)/.test(q)){const r=getBillNumbers();return {title:`Found ${r.length} bill / invoice number occurrence(s)`,paragraph:r.length?"Detected from bill, invoice, voucher and E-way bill labels. Review each original text snippet because OCR can confuse characters such as O/0 and I/1.":"No clearly labelled bill numbers were detected. Try opening the extraction report and checking the source page.",headers:["Bill / Invoice No.","PDF","Page","Original text snippet"],rows:rowsWithSources(r),name:"bill-numbers"};}
+ if(/\b(amount|total|taxable|value|grand total|invoice value)\b/.test(q)){const r=getAmounts();return {title:`Found ${r.length} labelled amount(s)`,paragraph:"Amounts were extracted beside common total/value labels. This is not a verified accounting total; check the source snippet and page.",headers:["Amount","Amount type","PDF","Page","Original text snippet"],rows:r.map(x=>[x.value,x.amountType,x.filename,x.page,x.snippet]),name:"amounts-list"};}
+ if(/party|supplier|buyer|consignee|vendor/.test(q)){const r=getPartyNames();return {title:`Found ${r.length} party-name candidate(s)`,paragraph:"Names were extracted from common supplier, buyer, consignee and party labels. Verify candidates where the source label is ambiguous.",headers:["Party name","PDF","Page","Original text snippet"],rows:rowsWithSources(r),name:"party-names"};}
+ if(/summari[sz]e|summary|overview|what is this|describe/.test(q)){const rows=documents.map(d=>[d.filename,d.pageCount,d.size_mb,d.report?.nativePages??0,d.report?.ocrPages??d.ocrPagesProcessed??0,d.report?.unreadablePages??0,d.report?.status||"review"]);return {title:`Document collection: ${documents.length} PDF(s), ${pages.length} page(s)`,paragraph:"This summary describes processing and extraction coverage, not a complete semantic summary of every document.",headers:["PDF","Pages","Size MB","Native pages","OCR pages","Unreadable","Status"],rows,name:"document-summary"};}
+ const hits=searchLines(question);return {title:`Found ${hits.length} matching text line(s)`,paragraph:hits.length?"Matches are shown with the original text snippet, document and page. Ask a more specific question to extract a structured field.":"No matching text was found. Try a shorter keyword, alternate spelling or one of the quick actions.",headers:["Original text snippet","PDF","Page","Context"],rows:hits.map(r=>[r.value,r.filename,r.page,r.snippet]),name:"pdf-search",evidence:hits};
+}
+
+async function sendQuestion(){
+ const question=$("question").value.trim();if(!question)return;$("question").value="";addMessage("user",question);$("sendBtn").disabled=true;$("aiStatus").textContent=activeModelId?`${activeModelId} is analyzing saved PDF evidence on the server…`:"Searching saved PDFs…";
+ try{const structured=answerQuestion(question);const data=await api("/api/chat",{method:"POST",body:JSON.stringify({question,structured})});if(data.answer?.aiText)structured.aiText=data.answer.aiText;addStructuredMessage(structured);}
+ catch(error){addMessage("assistant",`Could not complete the request: ${error.message}`);}
+ finally{$("sendBtn").disabled=false;$("aiStatus").textContent=activeModelId?`${activeModelId} loaded on Render` : "Server AI not loaded · document search is available";}
+}
+$("sendBtn").onclick=sendQuestion;$("question").addEventListener("keydown",e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();sendQuestion();}});
+document.querySelectorAll(".quick-actions button").forEach(b=>b.onclick=()=>{$("question").value=b.dataset.q;sendQuestion();});
+$("clearChat").onclick=async()=>{if(!confirm("Permanently clear saved chat history?"))return;try{await api("/api/chat",{method:"DELETE"});conversation=[];$("chatBody").replaceChildren();const welcome=document.createElement("div");welcome.id="welcome";welcome.className="welcome";welcome.innerHTML='<div class="emoji">💬</div><h2>Ask anything about your PDFs</h2><p>Your saved PDFs are searched together.</p>';$("chatBody").append(welcome);}catch(e){alert(e.message);}};
+$("exportChat").onclick=()=>{const text=conversation.map(m=>m.role.toUpperCase()+"\n"+m.text).join("\n\n----------------\n\n");const blob=new Blob([text],{type:"text/plain;charset=utf-8"});const url=URL.createObjectURL(blob);const a=document.createElement("a");a.href=url;a.download="pdf-chat-session.txt";a.click();URL.revokeObjectURL(url);};
+
+async function refreshAIStatus(){
+ try{const d=await api("/api/ai/status");activeModelId=d.loaded?"SmolLM2 360M":"";$("aiStatus").textContent=d.loaded?"SmolLM2 360M loaded on Render · server-side inference":d.loading?"Model is loading on Render…":"Server AI not loaded · document search is available";$("loadAI").classList.toggle("hidden",!!d.loaded);$("disableAI").classList.toggle("hidden",!d.loaded);$("loadAI").disabled=!!d.loading;}
+ catch(_){$("aiStatus").textContent="AI status unavailable";}
+}
+$("modelSelect").disabled=true;
+$("loadAI").onclick=async()=>{
+ if(aiLoading)return;aiLoading=true;$("loadAI").disabled=true;$("aiStatus").textContent="Loading the quantized SmolLM2 model into Render memory. This may take several minutes and may exceed the free instance memory…";
+ try{await api("/api/ai/load",{method:"POST",body:JSON.stringify({model:"smollm"})});activeModelId="SmolLM2 360M";$("aiStatus").textContent="SmolLM2 360M loaded on Render · server-side inference";$("loadAI").classList.add("hidden");$("disableAI").classList.remove("hidden");}
+ catch(error){$("aiStatus").textContent=error.message;$("loadAI").disabled=false;}
+ finally{aiLoading=false;checkHealth();}
+};
+$("disableAI").onclick=async()=>{try{await api("/api/ai/unload",{method:"POST",body:JSON.stringify({})});}catch(e){$("aiStatus").textContent=e.message;}activeModelId="";$("disableAI").classList.add("hidden");$("loadAI").classList.remove("hidden");$("loadAI").disabled=false;await refreshAIStatus();checkHealth();};
+
+(async()=>{try{const sessionInfo=await api("/api/session");if(sessionInfo.authenticated)await showWorkspace();else showLogin();}catch(_){showLogin();}})();
+</script>
+</body>
+</html>
