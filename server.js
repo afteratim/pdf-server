@@ -9,8 +9,6 @@ const PgSession = require('connect-pg-simple')(session);
 const { Pool } = require('pg');
 
 const app = express();
-// Render terminates HTTPS at its proxy; trust the single proxy hop so secure cookies work.
-app.set('trust proxy', 1);
 const PORT = Number(process.env.PORT || 10000);
 const PASSWORD = process.env.APP_PASSWORD || '';
 const SESSION_SECRET = process.env.SESSION_SECRET || '';
@@ -22,8 +20,12 @@ const MAX_OCR_PAGES = Number(process.env.MAX_OCR_PAGES || 10);
 const OCR_DPI = Number(process.env.OCR_DPI || 110);
 const TEMP_DIR = process.env.TEMP_DIR || '/tmp/pdf-analyzer';
 const PING_INTERVAL_MS = Number(process.env.PING_INTERVAL_MS || 60000);
-const MODEL_ID = 'smollm';
-const MODEL_PATH = process.env.MODEL_PATH || '/models/';
+const MODEL_ID = 'smollm2-135m-q4km';
+const MODEL_PATH = process.env.MODEL_PATH || '/models/SmolLM2-135M-Instruct-Q4_K_M.gguf';
+const LLAMA_SERVER_PATH = process.env.LLAMA_SERVER_PATH || '/usr/local/bin/llama-server';
+const LLAMA_PORT = Number(process.env.LLAMA_PORT || 8081);
+const LLAMA_CTX_SIZE = Number(process.env.LLAMA_CTX_SIZE || 1024);
+const LLAMA_THREADS = Number(process.env.LLAMA_THREADS || 1);
 const PDF_STORAGE_DIR = process.env.PDF_STORAGE_DIR || path.join(TEMP_DIR, 'uploads');
 
 if (!PASSWORD) throw new Error('APP_PASSWORD is required.');
@@ -41,6 +43,7 @@ const pool = new Pool({
 });
 
 app.disable('x-powered-by');
+app.set('trust proxy', 1);
 app.use(express.json({ limit: '2mb' }));
 app.use((req, res, next) => {
   res.setHeader('X-Content-Type-Options', 'nosniff');
@@ -59,7 +62,7 @@ app.use(session({
   rolling: true,
   cookie: {
     httpOnly: true,
-    secure: 'auto',
+    secure: process.env.NODE_ENV === 'production',
     sameSite: 'lax',
     maxAge: 30 * 24 * 60 * 60 * 1000
   }
@@ -218,7 +221,7 @@ app.get('/api/health', async (req, res) => {
   try { await pool.query('SELECT 1'); } catch (_) { db = 'error'; }
   res.json({ status: db === 'ok' ? 'ok' : 'degraded', application: 'Personal PDF Analyzer', version: '3.0.0',
     uptime_seconds: Math.floor(process.uptime()), memory_mb: Math.round(process.memoryUsage().rss / 1024 / 1024),
-    database: db, file_storage: 'local_ephemeral', ai: { loaded: Boolean(aiGenerator), loading: aiLoading, model: aiGenerator ? MODEL_ID : null } });
+    database: db, file_storage: 'local_ephemeral', ai: { loaded: Boolean(aiLoaded), loading: aiLoading, model: aiLoaded ? MODEL_ID : null } });
 });
 app.post('/api/login', checkSameOrigin, (req, res, next) => {
   const supplied = String(req.body.password || '');
@@ -345,40 +348,125 @@ async function retrieveEvidence(question) {
   return hits.sort((a, b) => b.score - a.score).slice(0, 12).map(({ score, ...hit }) => hit);
 }
 
-let aiGenerator = null;
+let aiProcess = null;
 let aiLoading = false;
 let aiError = '';
 let aiBusy = false;
-async function loadServerAI() {
-  if (aiGenerator) return { loaded: true, model: MODEL_ID };
-  if (aiLoading) throw new Error('The AI model is already loading. Please wait.');
-  aiLoading = true; aiError = '';
-  try {
-    const { pipeline, env } = await import('@huggingface/transformers');
-    env.localModelPath = MODEL_PATH;
-    env.allowRemoteModels = false;
-    env.allowLocalModels = true;
-    env.useFSCache = true;
-    aiGenerator = await pipeline('text-generation', MODEL_ID, { dtype: 'q4', device: 'cpu' });
-    return { loaded: true, model: MODEL_ID };
-  } catch (error) {
-    aiError = error.message || 'Model loading failed.';
-    aiGenerator = null;
-    throw error;
-  } finally { aiLoading = false; }
+let aiLoaded = false;
+let aiLoadPromise = null;
+
+function waitForLlamaReady(child, timeoutMs = 180000) {
+  return new Promise((resolve, reject) => {
+    const started = Date.now();
+    let settled = false;
+    let stderrTail = '';
+    const finish = (err) => {
+      if (settled) return;
+      settled = true;
+      clearInterval(timer);
+      clearTimeout(timeout);
+      if (err) reject(err); else resolve(true);
+    };
+    child.stderr?.on('data', chunk => {
+      stderrTail = (stderrTail + chunk.toString()).slice(-5000);
+    });
+    child.once('error', err => finish(err));
+    child.once('exit', (code, signal) => finish(new Error(`llama-server exited (${code ?? signal}). ${stderrTail.slice(-1500)}`)));
+    const timer = setInterval(async () => {
+      try {
+        const r = await fetch(`http://127.0.0.1:${LLAMA_PORT}/health`, { signal: AbortSignal.timeout(1500) });
+        if (r.ok) finish();
+      } catch (_) {}
+      if (Date.now() - started > timeoutMs) finish(new Error(`Timed out waiting for llama-server. ${stderrTail.slice(-1500)}`));
+    }, 1000);
+    const timeout = setTimeout(() => finish(new Error(`Timed out waiting for llama-server. ${stderrTail.slice(-1500)}`)), timeoutMs + 1000);
+  });
 }
-app.get('/api/ai/status', requireLogin, (req, res) => res.json({ loaded: Boolean(aiGenerator), loading: aiLoading, busy: aiBusy, model: aiGenerator ? 'SmolLM2 360M' : null, error: aiError || null }));
+
+async function loadServerAI() {
+  if (aiLoaded && aiProcess && !aiProcess.killed) return { loaded: true, model: MODEL_ID };
+  if (aiLoadPromise) return aiLoadPromise;
+  aiLoading = true;
+  aiError = '';
+  aiLoadPromise = (async () => {
+    try {
+      await fs.promises.access(MODEL_PATH, fs.constants.R_OK);
+      aiProcess = spawn(LLAMA_SERVER_PATH, [
+        '--model', MODEL_PATH,
+        '--host', '127.0.0.1',
+        '--port', String(LLAMA_PORT),
+        '--ctx-size', String(LLAMA_CTX_SIZE),
+        '--threads', String(LLAMA_THREADS),
+        '--threads-batch', String(LLAMA_THREADS),
+        '--batch-size', '32',
+        '--ubatch-size', '32',
+        '--parallel', '1',
+        '--n-predict', '128',
+        '--no-webui'
+      ], { stdio: ['ignore', 'ignore', 'pipe'] });
+      aiProcess.on('exit', (code, signal) => {
+        aiLoaded = false;
+        if (code !== 0 && code !== null) aiError = `llama-server exited with code ${code}`;
+        console.error(`[AI] llama-server exited: code=${code} signal=${signal}`);
+      });
+      await waitForLlamaReady(aiProcess);
+      aiLoaded = true;
+      return { loaded: true, model: MODEL_ID };
+    } catch (error) {
+      aiError = error.message || 'Model loading failed.';
+      if (aiProcess && !aiProcess.killed) aiProcess.kill('SIGTERM');
+      aiProcess = null;
+      aiLoaded = false;
+      throw error;
+    } finally {
+      aiLoading = false;
+      aiLoadPromise = null;
+    }
+  })();
+  return aiLoadPromise;
+}
+
+app.get('/api/ai/status', requireLogin, (req, res) => res.json({
+  loaded: aiLoaded && Boolean(aiProcess) && !aiProcess.killed,
+  loading: aiLoading,
+  busy: aiBusy,
+  model: aiLoaded ? 'SmolLM2 135M Instruct Q4_K_M' : null,
+  error: aiError || null,
+  memory_mb: Math.round(process.memoryUsage().rss / 1048576)
+}));
 app.post('/api/ai/load', requireLogin, checkSameOrigin, async (req, res) => {
-  try { await loadServerAI(); res.json({ success: true, loaded: true, model: 'SmolLM2 360M' }); }
-  catch (error) { res.status(503).json({ error: `Server-side model could not load: ${error.message}. Document search remains available.`, memory_mb: Math.round(process.memoryUsage().rss / 1048576) }); }
+  try {
+    await loadServerAI();
+    res.json({ success: true, loaded: true, model: 'SmolLM2 135M Instruct Q4_K_M' });
+  } catch (error) {
+    res.status(503).json({ error: `Server-side model could not load: ${error.message}. Document search remains available.`, memory_mb: Math.round(process.memoryUsage().rss / 1048576) });
+  }
 });
-app.post('/api/ai/unload', requireLogin, checkSameOrigin, async (req, res) => {
-  try { if (aiGenerator && typeof aiGenerator.dispose === 'function') await aiGenerator.dispose(); }
-  catch (error) { console.error('Model unload warning:', error.message); }
-  aiGenerator = null;
-  if (global.gc) global.gc();
-  res.json({ success: true, loaded: false });
+// Intentionally do not unload a successfully loaded model. It remains resident until the service restarts.
+app.post('/api/ai/unload', requireLogin, checkSameOrigin, (req, res) => {
+  res.status(409).json({ error: 'Model unloading is disabled. The AI remains loaded until the Render service restarts.' });
 });
+
+async function runServerAI(prompt) {
+  const response = await fetch(`http://127.0.0.1:${LLAMA_PORT}/v1/chat/completions`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      model: 'local-model',
+      messages: [
+        { role: 'system', content: 'You are a careful private PDF document assistant. Answer only from supplied evidence. Never invent invoice numbers, GSTINs, dates, names or financial values. If evidence is insufficient, say so. Cite source filename and page number.' },
+        { role: 'user', content: prompt }
+      ],
+      temperature: 0,
+      max_tokens: 128,
+      stream: false
+    }),
+    signal: AbortSignal.timeout(180000)
+  });
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) throw new Error(data.error?.message || data.error || `llama-server returned HTTP ${response.status}`);
+  return String(data.choices?.[0]?.message?.content || '').trim();
+}
 app.post('/api/chat', requireLogin, checkSameOrigin, async (req, res, next) => {
   try {
     const question = String(req.body.question || '').trim().slice(0, 5000);
@@ -398,18 +486,15 @@ app.post('/api/chat', requireLogin, checkSameOrigin, async (req, res, next) => {
       if (structuredEvidence.length) evidence = structuredEvidence;
     }
     let aiText = '';
-    if (aiGenerator && !aiBusy) {
+    if (aiLoaded && !aiBusy) {
       aiBusy = true;
       const evidenceText = evidence.map((item, i) => `[${i + 1}] ${item.filename}, page ${item.page}: ${item.snippet}`).join('\n').slice(0, 6500);
-      const prompt = `You are a careful private PDF document assistant. Answer only from the evidence below. Never invent invoice numbers, GSTINs, dates, names or financial values. If evidence is insufficient, say so. Cite the source filename and page number. Distinguish invoice date, due date and other dates. Distinguish taxable value, GST components and invoice total.\n\nQuestion: ${question}\n\nEvidence:\n${evidenceText || 'No matching evidence was found.'}\n\nAnswer:`;
       try {
-        const output = await aiGenerator(prompt, { max_new_tokens: 180, do_sample: false, temperature: 0 });
-        const generated = output?.[0]?.generated_text || '';
-        aiText = String(generated).slice(prompt.length).trim() || 'The model returned no explanation. Review the extracted results below.';
+        aiText = await runServerAI(`Question: ${question}\n\nEvidence:\n${evidenceText || 'No matching evidence was found.'}\n\nAnswer using only this evidence.`) || 'The model returned no explanation. Review the extracted results below.';
       } catch (error) { aiText = `AI inference failed: ${error.message}. The extracted results remain available.`; }
       finally { aiBusy = false; }
     } else if (aiLoading) aiText = 'The AI model is still loading. Please try again in a moment.';
-    else if (aiGenerator && aiBusy) aiText = 'The AI model is processing another question. Please try again shortly.';
+    else if (aiLoaded && aiBusy) aiText = 'The AI model is processing another question. Please try again shortly.';
     const title = structured?.title || (evidence.length ? `Found ${evidence.length} matching evidence line(s)` : 'No matching evidence found');
     const paragraph = structured?.paragraph || (evidence.length ? 'Relevant text was retrieved from your saved PDFs.' : 'No matching text was found. Try different keywords or check the extraction report.');
     const answer = { title, paragraph, headers: structured?.headers || (evidence.length ? ['PDF', 'Page', 'Original text snippet'] : undefined), rows: structured?.rows || (evidence.length ? evidence.map(e => [e.filename, e.page, e.snippet]) : undefined), name: structured?.name || 'pdf-search', aiText: aiText || undefined };
@@ -422,7 +507,7 @@ app.post('/api/chat', requireLogin, checkSameOrigin, async (req, res, next) => {
       await client.query('COMMIT');
     } catch (error) { await client.query('ROLLBACK'); throw error; }
     finally { client.release(); }
-    res.json({ success: true, answer, evidence, ai_loaded: Boolean(aiGenerator) });
+    res.json({ success: true, answer, evidence, ai_loaded: Boolean(aiLoaded) });
   } catch (error) { next(error); }
 });
 
@@ -456,7 +541,7 @@ async function pingUrlsNow() {
     await initDatabase();
     app.listen(PORT, '0.0.0.0', () => {
       console.log(`Personal PDF Analyzer v3 running on port ${PORT}`);
-      console.log(`Persistent database: connected · PDF storage: local temporary filesystem · Model path: ${MODEL_ID}`);
+      console.log(`Persistent database: connected · PDF storage: local temporary filesystem · AI engine: llama.cpp · model: ${MODEL_ID}`);
       console.log(`Maximum upload: ${MAX_UPLOAD_MB} MB · OCR pages: ${MAX_OCR_PAGES} · self-ping targets: ${pingUrls.length}`);
       if (pingUrls.length) setInterval(pingUrlsNow, PING_INTERVAL_MS);
     });
